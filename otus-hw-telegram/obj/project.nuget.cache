@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "7MS8XvMSHPbcBXG6T1tJNEeN1TUCMMqMazMROAr7xPEYk+Sn8G5i04SsdTzVmA98zfN+1hJHkwpfP3jo4DDfjg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\o.rovenskiy\\source\\repos\\otus-hw-telegram\\otus-hw-telegram\\otus-hw-telegram.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\o.rovenskiy\\.nuget\\packages\\newtonsoft.json\\12.0.2\\newtonsoft.json.12.0.2.nupkg.sha512",
+    "C:\\Users\\o.rovenskiy\\.nuget\\packages\\telegram.bot\\18.0.0\\telegram.bot.18.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
