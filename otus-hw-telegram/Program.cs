@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using System;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -7,19 +8,26 @@ using static System.Net.Mime.MediaTypeNames;
 
 Console.WriteLine("Hello, World!");
 
+// перечень клиентов, в перспективе они будут в ЬД
+
 var customers = new List<Customer> {
-    new Customer("Oleg", "R", "admin"),
+    new Customer("Oleg", "R", "admin11"),
         new Customer("Igor", "Fet", "specialist"),
         new Customer("Sergei", "Ivanov", "Danon"),
 };
 
-foreach (var f in customers)
-    Console.WriteLine("oleg" + f.FirstName + f.LastName + f.Role);
+DateTime h = new DateTime(2022, 1, 1, 01, 01, 00);
 
 
 
-customers.Add(new Customer("Ser", "Pak", "admin"));
+var tickets = new List<Ticket> {
+    new Ticket (1, "alarm", "Danon", h, "ivan"),
+    };
 
+
+
+
+// перечень приветствий от Бота в зависимости от роли
 
 const string helpTextClient = @"
 - /NewTicket - открыть тикет
@@ -53,7 +61,7 @@ client.StartReceiving(UpdateHandler, ErrorHandler);
 
 //Customer aa = new Customer();
 
-
+// по умолчанию
 async Task ErrorHandler(ITelegramBotClient arg1, Exception arg2, CancellationToken arg3)
 {
   throw new NotImplementedException();
@@ -114,15 +122,19 @@ async Task NewTicketHandler(
     }
     else if (!string.IsNullOrEmpty(text))
     {
+        var foundCustomer = customers.FirstOrDefault(x => x.FirstName.Contains(update.Message.Chat.FirstName) 
+        && x.LastName.Contains(update.Message.Chat.LastName));
 
-        Ticket ticket1 = new Ticket();
-        ticket1.Number = 1;
-        ticket1.Name = text;
-        ticket1.SendTicketDataToDB();
+ // создание нового тикета, статус по умолчанию прописан как опен
 
+        tickets.Add(new Ticket (tickets.Last().Number+1, text, foundCustomer.Role, update.Message.Date, null));
 
+        foreach (var ll in tickets)
+        {
+            Console.WriteLine(ll.Number + ll.Name + ll.Client + ll.Created + ll.Specialist + ll.TicketStatus);
+        }
         await client.SendTextMessageAsync(update.Message.Chat.Id,
-            $"Название вашей пробблемы:     '{ticket1.Name}'");             // '{text}'");
+            $"Тикет успешно создан");             // '{text}'");
     }
 
 }
@@ -144,8 +156,23 @@ async Task TicketStatusHandler(
     else if (!string.IsNullOrEmpty(text))
     {
 
-        await client.SendTextMessageAsync(update.Message.Chat.Id,
-            $"Ура, вы выиграли приз!!!!");
+
+        //    var foundCustomer = customers.FirstOrDefault(x => x.FirstName.Contains(chat.FirstName) && x.LastName.Contains(chat.LastName));
+
+ 
+        var ticketFound = tickets.FirstOrDefault(x => x.Number.ToString().Contains(text));
+
+        if (ticketFound != null)
+        {
+            await client.SendTextMessageAsync(update.Message.Chat.Id,
+            $"Ура, вы выиграли приз!!!! {ticketFound.TicketStatus}");
+        }
+        else
+        {
+            await client.SendTextMessageAsync(update.Message.Chat.Id,
+                "Я не нашел такого тикета");
+        }
+        await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите тикет для поиска или /exit");
     }
 
 }
@@ -186,7 +213,7 @@ async Task NewCustomerHandler(
 
 
 
-
+// обработчик сообщений от клиента бота
 
 async Task UpdateHandler(ITelegramBotClient client, 
     Update update, 
@@ -260,7 +287,7 @@ string GetGreeting (Chat chat)
     Console.WriteLine(chat.FirstName + "   " + chat.LastName);
 
 
-    var foundCustomer = customers.FirstOrDefault(x => x.FirstName.Contains(chat.FirstName) || x.LastName.Contains(chat.LastName));
+    var foundCustomer = customers.FirstOrDefault(x => x.FirstName.Contains(chat.FirstName) && x.LastName.Contains(chat.LastName));
     if (foundCustomer != null)
     {
         if (foundCustomer.Role == "admin")

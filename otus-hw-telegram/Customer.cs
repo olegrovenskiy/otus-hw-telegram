@@ -19,11 +19,6 @@ public class Customer
 	public string Role { get; set; }
 
 
-	public void TicketCreation()
-	{
 
-		Ticket ticket = new Ticket();
-
-	}
 
 }
