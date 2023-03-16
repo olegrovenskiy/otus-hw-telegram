@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using static System.Net.Mime.MediaTypeNames;
+using System.Linq;
 
 
 Console.WriteLine("Hello, World!");
@@ -14,7 +15,7 @@ Console.WriteLine("Hello, World!");
 // перечень клиентов, в перспективе они будут в ЬД
 
 var customers = new List<Customer> {
-    new Customer("Oleg", "R", "specialist111"),
+    new Customer("Oleg", "R", "specialist"),
         new Customer("Igor", "Fet", "specialist"),
         new Customer("Sergei", "Ivanov", "Danon"),
 };
@@ -26,6 +27,7 @@ DateTime h = new DateTime(2022, 1, 1, 01, 01, 00);
 var tickets = new List<Ticket> {
     new Ticket (1, "alarm", "Danon", h, null),
     new Ticket (2, "resolev", "DanonInt", h, "ivan sergeev"),
+
     };
 
 
@@ -118,6 +120,36 @@ async Task DefaultHandler(
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета с которым планируете работать или /exit");
 
             break;
+
+
+        case "/SolveTicket":
+            mode = AppMode.SolveTicket;
+
+            // нужен вывод назначеных тикетов
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "У вас в работе следующие тикеты");
+
+            var SignedTickets = from tt in tickets
+                                where tt.Specialist.Contains(update.Message.Chat.FirstName+update.Message.Chat.LastName)
+                                where tt.TicketStatus == Ticket.Status.OnWork
+                                orderby tt.Number
+                                select tt;
+
+            foreach (var t in SignedTickets)
+                await client.SendTextMessageAsync(update.Message.Chat.Id, $"номер {t.Number}, проблема {t.Name}, заказчик {t.Client}");
+
+
+
+
+
+
+
+
+
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер решённого тикета или /exit");
+            break;
+
+
 
 
         default:
@@ -219,8 +251,7 @@ async Task NewCustomerHandler(
 {
     var text = update.Message?.Text?.Trim();
 
-    // string[] words = text.Split(new char[] { ',' });
-    //(!string.IsNullOrEmpty(words[0]) && !string.IsNullOrEmpty(words[1]) && !string.IsNullOrEmpty(words[2]))
+
 
     if (text == "/exit")
     {
@@ -229,8 +260,6 @@ async Task NewCustomerHandler(
     }
     else if (!string.IsNullOrEmpty(text))
     {
-
-        //  string input = text;
 
 
 
@@ -298,7 +327,7 @@ async Task GetOpenTicketsHandler(
             // перевод тикета в работу и назначение специалиста
 
             foundTicket.TicketStatus = Ticket.Status.OnWork;
-            foundTicket.Specialist = $"{update.Message.Chat.FirstName} {update.Message.Chat.LastName}";
+            foundTicket.Specialist = $"{update.Message.Chat.FirstName}{update.Message.Chat.LastName}";
 
             await client.SendTextMessageAsync(update.Message.Chat.Id, $"Тике номер {text} назначен вам в работу");
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Будете работать ещё с одним тикетом или /exit");
@@ -313,12 +342,29 @@ async Task GetOpenTicketsHandler(
         }
 
 
+    }
+
+}
 
 
 
-        
 
-        // await client.SendTextMessageAsync(update.Message.Chat.Id, " открытый тикет");
+
+async Task SolveTicketsHandler(
+    ITelegramBotClient client,
+    Update update,
+    CancellationToken ct)
+{
+    var text = update.Message?.Text?.Trim();
+
+    if (text == "/exit")
+    {
+        mode = AppMode.Default;
+        await client.SendTextMessageAsync(update.Message.Chat.Id, "Пока");
+    }
+    else if (!string.IsNullOrEmpty(text))
+    {
+        await client.SendTextMessageAsync(update.Message.Chat.Id, "  Ура Ура Ура");
     }
 
 }
@@ -328,17 +374,9 @@ async Task GetOpenTicketsHandler(
 
 
 
+        // обработчик сообщений от клиента бота
 
-
-
-
-
-
-
-
-// обработчик сообщений от клиента бота
-
-async Task UpdateHandler(ITelegramBotClient client, 
+ async Task UpdateHandler(ITelegramBotClient client, 
     Update update, 
     CancellationToken ct)
 
@@ -382,25 +420,16 @@ async Task UpdateHandler(ITelegramBotClient client,
             await GetOpenTicketsHandler(client, update, ct);
             break;
 
+        case AppMode.SolveTicket:
+            await SolveTicketsHandler(client, update, ct);
+            break;
+
+
+
 
     }
 
 
-
-    /*
-    await client.SendTextMessageAsync(chatId,
-           $"Здравствуйте, я помогу Вам 😀");
-
-
-    await client.SendTextMessageAsync(chatId, 
-        $"вы отправли сообщение '*{message.Text}*'",
-        Telegram.Bot.Types.Enums.ParseMode.MarkdownV2);
-
-  
-    await client.SendTextMessageAsync(chatId,
-            $"напиши ещё что нибудь 😀");
-
-    */
 
 }
 
