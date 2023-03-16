@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualBasic;
 using System;
+using System.Data;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -11,7 +13,7 @@ Console.WriteLine("Hello, World!");
 // перечень клиентов, в перспективе они будут в ЬД
 
 var customers = new List<Customer> {
-    new Customer("Oleg", "R", "admin11"),
+    new Customer("Oleg", "R", "admin"),
         new Customer("Igor", "Fet", "specialist"),
         new Customer("Sergei", "Ivanov", "Danon"),
 };
@@ -22,6 +24,7 @@ DateTime h = new DateTime(2022, 1, 1, 01, 01, 00);
 
 var tickets = new List<Ticket> {
     new Ticket (1, "alarm", "Danon", h, "ivan"),
+    new Ticket (2, "resolev", "DanonInt", h, "ivan"),
     };
 
 
@@ -38,7 +41,7 @@ const string helpTextAdmin = @"
 - /NewCustomer - авторизовать нового пользователя";
 
 const string helpTextSpecialist = @"
-- /WorkTicket - узнать тикеты в работе
+- /GetOpenTickets - узнать тикеты в работе;
 - /SolveTicket - решить тикет";
 
 
@@ -90,12 +93,29 @@ async Task DefaultHandler(
 
         case "/StatusTicket":
             mode = AppMode.GetStatus;
-            await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер вашего тикета или /exit");
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, $"В системе заведено {tickets.Count} тикетов");
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета информацию о котором вы хотите получить или /exit");
+            
             break;
 
         case "/NewCustomer":
             mode = AppMode.NewCustomer;
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите имя, фамилию, роль или компанию, через запятую или /exit");
+            break;
+
+        case "/GetOpenTickets":
+            mode = AppMode.GetOpenTickets;
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "Есть следующие открытые тикеты:");
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "Номер     Имя    Статус:");
+            foreach (Ticket tt in tickets)
+            {
+                if (tt.TicketStatus == 0)
+                await client.SendTextMessageAsync(update.Message.Chat.Id, $"{tt.Number}     {tt.Name}  {tt.TicketStatus} ");
+
+            }
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета с которым планируете работать или /exit");
+
             break;
 
 
@@ -164,8 +184,13 @@ async Task TicketStatusHandler(
 
         if (ticketFound != null)
         {
-            await client.SendTextMessageAsync(update.Message.Chat.Id,
-            $"Ура, вы выиграли приз!!!! {ticketFound.TicketStatus}");
+
+
+         //   await client.SendTextMessageAsync(update.Message.Chat.Id, "Номер     Имя    Специалист  Статус  Время создания");
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Number}  с проблемой {ticketFound.Name} " +
+                $"назначен на {ticketFound.Specialist} " +
+                $"статус {ticketFound.TicketStatus} создан {ticketFound.Created}");
         }
         else
         {
@@ -184,6 +209,46 @@ async Task NewCustomerHandler(
 {
     var text = update.Message?.Text?.Trim();
 
+    // string[] words = text.Split(new char[] { ',' });
+    //(!string.IsNullOrEmpty(words[0]) && !string.IsNullOrEmpty(words[1]) && !string.IsNullOrEmpty(words[2]))
+
+    if (text == "/exit")
+    {
+        mode = AppMode.Default;
+        await client.SendTextMessageAsync(update.Message.Chat.Id, "Пока");
+    }
+    else if (!string.IsNullOrEmpty(text))
+        {
+
+            string input = text;
+
+
+            string[] words = text.Split(new char[] { ',' });
+
+            customers.Add(new Customer(words[0], words[1], words[2]));
+
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id,
+                $"Пользователь {words[0]}  {words[1]}  {words[2]}  успешно добавлен");
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите данные ещё одного пользователя или /exit");
+        }
+
+
+    
+
+}
+
+
+
+
+async Task GetOpenTicketsHandler(
+    ITelegramBotClient client,
+    Update update,
+    CancellationToken ct)
+{
+    var text = update.Message?.Text?.Trim();
+
     if (text == "/exit")
     {
         mode = AppMode.Default;
@@ -191,25 +256,50 @@ async Task NewCustomerHandler(
     }
     else if (!string.IsNullOrEmpty(text))
     {
+        // обработка введёного номера тикета    
+        //var foundContact = contacts.FirstOrDefault(x => x.FirstName.ToLower() == text || x.LastName.ToLower() == text);
 
-        string input = text;
-        string[] words = text.Split(new char[] { ',' });
-        customers.Add(new Customer(words[0], words[1], words[2]));
+        var foundTicket = tickets.FirstOrDefault(x => x.Number.ToString().Equals(text));
 
-        foreach (string s in words)
+        if (foundTicket != null)
         {
-            Console.WriteLine(s);
+
+            // перевод тикета в работу и назначение специалиста
+
+            foundTicket.TicketStatus = Ticket.Status.OnWork;
+            foundTicket.Specialist = $"{update.Message.Chat.FirstName} {update.Message.Chat.LastName}";
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, $"Тике номер {text} назначен вам в работу");
+        }
+        else
+        {
+            await client.SendTextMessageAsync(update.Message.Chat.Id,
+                $"Неправильный номер тикета '{text}'");
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета ещё раз или /exit");
+
         }
 
 
-        foreach (var f in customers)
-            Console.WriteLine(f.FirstName + f.LastName + f.Role);
 
-        await client.SendTextMessageAsync(update.Message.Chat.Id,
-            $"Пользователь успешно добавлен");
+
+
+        
+
+        // await client.SendTextMessageAsync(update.Message.Chat.Id, " открытый тикет");
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -254,6 +344,10 @@ async Task UpdateHandler(ITelegramBotClient client,
             await NewCustomerHandler(client, update, ct);
             break;
 
+
+        case AppMode.GetOpenTickets:
+            await GetOpenTicketsHandler(client, update, ct);
+            break;
 
 
     }
@@ -327,7 +421,7 @@ string GetGreeting (Chat chat)
 
         return $@"
     Привет, {chat.FirstName} {chat.LastName}!
-    Меня зовут {me.Username}, к сожалению я не нашёл Вас";
+    Меня зовут {me.Username}, к сожалению я не нашёл Вас, обратитесь к Администратору по support@support.ru";
 
 
     }
@@ -340,7 +434,7 @@ enum AppMode
     OpenTicket = 1,
     GetStatus = 2,
     NewCustomer = 3,
-    WorkTicket = 4,
+    GetOpenTickets = 4,
     SolveTicket = 5,
 }
 
