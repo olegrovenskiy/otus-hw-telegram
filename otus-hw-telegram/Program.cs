@@ -381,7 +381,7 @@ async Task SolveTicketsHandler(
                             route = 2;
                         }
                         else
-                            await client.SendTextMessageAsync(update.Message.Chat.Id, " NOT  Ура Ура Ура");
+                            await client.SendTextMessageAsync(update.Message.Chat.Id, "ВВедите тикет который у вас в работе или /exit");
                     }
                     //------------------------------------
                 }
@@ -393,6 +393,8 @@ async Task SolveTicketsHandler(
 
 
                 await client.SendTextMessageAsync(update.Message.Chat.Id, " Тикет успешно закрыт ");
+                route = 1;
+                await client.SendTextMessageAsync(update.Message.Chat.Id, "Будете работать ещё с одним тикетом или /exit");
                 break;
 
 
