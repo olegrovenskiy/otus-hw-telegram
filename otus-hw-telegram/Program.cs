@@ -30,7 +30,8 @@ var tickets = new List<Ticket> {
 
     };
 
-
+tickets.First().Solution = "input power plag";
+tickets.First().TicketStatus = Ticket.Status.Closed;
 
 
 // перечень приветствий от Бота в зависимости от роли
@@ -108,11 +109,27 @@ async Task DefaultHandler(
         case "/StatusClientTicket":
             mode = AppMode.GetStatusClient;
 
-            await client.SendTextMessageAsync(update.Message.Chat.Id, $"В системе заведено {tickets.Count} тикетов");
-            await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета информацию о котором вы хотите получить или /exit");
+            //search client company name
+
+            var foundCustomerCompany = customers.FirstOrDefault(x => x.FirstName.Contains(update.Message.Chat.FirstName)
+                    && x.LastName.Contains(update.Message.Chat.LastName));
+         
+
+            // search cloent tickets
+
+            var ClientTickets = from tt in tickets
+                                where tt.Client.Contains(foundCustomerCompany.Role)
+                                orderby tt.Number
+                                select tt;
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, $"Компанией {foundCustomerCompany.Role} системе были заведены следующие тикеты");
+
+            foreach (var t in ClientTickets)
+            await client.SendTextMessageAsync(update.Message.Chat.Id, $"Тикет {t.Number} с проблемой {t.Name} " +
+                $"зарегестрирован {t.Created} имеет статус {t.TicketStatus}");
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер решённоги тикета информацию о решении которого вы хотите получить или /exit");
             break;
-
-
 
 
 
@@ -271,28 +288,25 @@ async Task TicketClientStatusHandler(
     else if (!string.IsNullOrEmpty(text))
     {
 
+        var foundCustomerCompany = customers.FirstOrDefault(x => x.FirstName.Contains(update.Message.Chat.FirstName)
+                            && x.LastName.Contains(update.Message.Chat.LastName));
 
-        //    var foundCustomer = customers.FirstOrDefault(x => x.FirstName.Contains(chat.FirstName) && x.LastName.Contains(chat.LastName));
+
+        var ticketFound = tickets.FirstOrDefault(x => x.Number.ToString().Contains(text) && x.Client.Contains(foundCustomerCompany.Role)
+         && x.TicketStatus == Ticket.Status.Closed);
 
 
-        var ticketFound = tickets.FirstOrDefault(x => x.Number.ToString().Contains(text));
+
+
 
         if (ticketFound != null)
         {
 
 
-            //   await client.SendTextMessageAsync(update.Message.Chat.Id, "Номер     Имя    Специалист  Статус  Время создания");
+            await client.SendTextMessageAsync(update.Message.Chat.Id, $"По тикету {ticketFound.Number} специалистом было предложено следующее решение:");
+            await client.SendTextMessageAsync(update.Message.Chat.Id, ticketFound.Solution);
 
 
-            if (ticketFound.Specialist != null)
-            {
-                await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Number}  с проблемой {ticketFound.Name} " +
-                    $"назначен на {ticketFound.Specialist} " +
-                    $"статус {ticketFound.TicketStatus} создан {ticketFound.Created}");
-            }
-            else
-                await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Number}  с проблемой {ticketFound.Name} " +
-                                    $"не назначен на специалиста, cоздан {ticketFound.Created}");
 
 
         }
@@ -359,7 +373,6 @@ async Task NewCustomerHandler(
 
 }
 #endregion
-
 
 
 
@@ -471,8 +484,6 @@ async Task SolveTicketsHandler(
 
 }
 #endregion
-
-
 
 
 
