@@ -49,7 +49,7 @@ const string helpTextSpecialist = @"
 
 
 
-
+int route = 1;
 var mode = AppMode.Default;
 
 
@@ -136,14 +136,6 @@ async Task DefaultHandler(
 
             foreach (var t in SignedTickets)
                 await client.SendTextMessageAsync(update.Message.Chat.Id, $"номер {t.Number}, проблема {t.Name}, заказчик {t.Client}");
-
-
-
-
-
-
-
-
 
 
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер решённого тикета или /exit");
@@ -357,15 +349,47 @@ async Task SolveTicketsHandler(
 {
     var text = update.Message?.Text?.Trim();
 
+
+
     if (text == "/exit")
     {
         mode = AppMode.Default;
         await client.SendTextMessageAsync(update.Message.Chat.Id, "Пока");
     }
+
+
+
+
     else if (!string.IsNullOrEmpty(text))
-    {
-        await client.SendTextMessageAsync(update.Message.Chat.Id, "  Ура Ура Ура");
-    }
+
+        switch (route)
+        {
+
+            case 1:
+                {
+                    //-------------------
+                    {
+                        var foundTicket = tickets.FirstOrDefault(x => x.Number.ToString().Equals(text)
+                         && x.Specialist.Contains(update.Message.Chat.FirstName + update.Message.Chat.LastName) && x.TicketStatus == Ticket.Status.OnWork);
+
+                        if (foundTicket != null)
+                        {
+                            await client.SendTextMessageAsync(update.Message.Chat.Id, "  Запишите решение или");
+                            route = 2;
+                        }
+                        else
+                            await client.SendTextMessageAsync(update.Message.Chat.Id, " NOT  Ура Ура Ура");
+                    }
+                    //------------------------------------
+                }
+                 break;
+
+                case 2:
+                await client.SendTextMessageAsync(update.Message.Chat.Id, " Тикет успешно закрыт ");
+                break;
+
+
+        }
 
 }
 
