@@ -15,7 +15,7 @@ Console.WriteLine("Hello, World!");
 // перечень клиентов, в перспективе они будут в ЬД
 
 var customers = new List<Customer> {
-    new Customer("Oleg", "R", "specialist"),
+    new Customer("Oleg", "R", "Danon"),
         new Customer("Igor", "Fet", "specialist"),
         new Customer("Sergei", "Ivanov", "Danon"),
 };
@@ -37,7 +37,7 @@ var tickets = new List<Ticket> {
 
 const string helpTextClient = @"
 - /NewTicket - открыть тикет
-- /StatusTicket - узнать статус тикета";
+- /StatusClientTicket - узнать статус тикета";
 
 const string helpTextAdmin = @"
 - /StatusTicket - узнать статус тикета
@@ -75,6 +75,8 @@ async Task ErrorHandler(ITelegramBotClient arg1, Exception arg2, CancellationTok
 }
 
 
+#region DefaultHandler
+
 async Task DefaultHandler(
     ITelegramBotClient client,
     Update update,
@@ -100,8 +102,19 @@ async Task DefaultHandler(
 
             await client.SendTextMessageAsync(update.Message.Chat.Id, $"В системе заведено {tickets.Count} тикетов");
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета информацию о котором вы хотите получить или /exit");
-            
             break;
+
+
+        case "/StatusClientTicket":
+            mode = AppMode.GetStatusClient;
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, $"В системе заведено {tickets.Count} тикетов");
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета информацию о котором вы хотите получить или /exit");
+            break;
+
+
+
+
 
         case "/NewCustomer":
             mode = AppMode.NewCustomer;
@@ -151,9 +164,11 @@ async Task DefaultHandler(
     }
 }
 
+#endregion
 
 
 
+#region NewTicketHandler
 async Task NewTicketHandler(
     ITelegramBotClient client,
     Update update,
@@ -184,9 +199,10 @@ async Task NewTicketHandler(
     }
 
 }
+#endregion
 
 
-
+#region TicketStatusHandler
 async Task TicketStatusHandler(
     ITelegramBotClient client,
     Update update,
@@ -236,7 +252,63 @@ async Task TicketStatusHandler(
     }
 
 }
+#endregion
 
+
+#region TicketClientStatusHandler
+async Task TicketClientStatusHandler(
+    ITelegramBotClient client,
+    Update update,
+    CancellationToken ct)
+{
+    var text = update.Message?.Text?.Trim();
+
+    if (text == "/exit")
+    {
+        mode = AppMode.Default;
+        await client.SendTextMessageAsync(update.Message.Chat.Id, "Пока");
+    }
+    else if (!string.IsNullOrEmpty(text))
+    {
+
+
+        //    var foundCustomer = customers.FirstOrDefault(x => x.FirstName.Contains(chat.FirstName) && x.LastName.Contains(chat.LastName));
+
+
+        var ticketFound = tickets.FirstOrDefault(x => x.Number.ToString().Contains(text));
+
+        if (ticketFound != null)
+        {
+
+
+            //   await client.SendTextMessageAsync(update.Message.Chat.Id, "Номер     Имя    Специалист  Статус  Время создания");
+
+
+            if (ticketFound.Specialist != null)
+            {
+                await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Number}  с проблемой {ticketFound.Name} " +
+                    $"назначен на {ticketFound.Specialist} " +
+                    $"статус {ticketFound.TicketStatus} создан {ticketFound.Created}");
+            }
+            else
+                await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Number}  с проблемой {ticketFound.Name} " +
+                                    $"не назначен на специалиста, cоздан {ticketFound.Created}");
+
+
+        }
+        else
+        {
+            await client.SendTextMessageAsync(update.Message.Chat.Id,
+                "Я не нашел такого тикета");
+        }
+        await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите тикет для поиска или /exit");
+    }
+
+}
+#endregion
+
+
+#region NewCustomerHandler
 async Task NewCustomerHandler(
     ITelegramBotClient client,
     Update update,
@@ -286,15 +358,12 @@ async Task NewCustomerHandler(
 
 
 }
-
-
-    
-
+#endregion
 
 
 
 
-
+#region GetOpenTicketHandler
 async Task GetOpenTicketsHandler(
     ITelegramBotClient client,
     Update update,
@@ -338,11 +407,11 @@ async Task GetOpenTicketsHandler(
     }
 
 }
+#endregion
 
 
 
-
-
+#region SolveTicketHandler
 async Task SolveTicketsHandler(
     ITelegramBotClient client,
     Update update,
@@ -401,15 +470,14 @@ async Task SolveTicketsHandler(
         }
 
 }
+#endregion
 
 
 
 
 
-
-        // обработчик сообщений от клиента бота
-
- async Task UpdateHandler(ITelegramBotClient client, 
+#region UpdateHandler
+async Task UpdateHandler(ITelegramBotClient client, 
     Update update, 
     CancellationToken ct)
 
@@ -440,6 +508,13 @@ async Task SolveTicketsHandler(
             break;
 
 
+        case AppMode.GetStatusClient:
+            await TicketClientStatusHandler(client, update, ct);
+            break;
+
+
+
+
         case AppMode.OpenTicket:
             await NewTicketHandler(client, update, ct);
             break;
@@ -465,11 +540,13 @@ async Task SolveTicketsHandler(
 
 
 }
-
+#endregion
 
 
 
 Console.ReadKey();
+
+#region Metod Greeting
 string GetGreeting (Chat chat)
 {
 
@@ -522,6 +599,8 @@ string GetGreeting (Chat chat)
     }
 
 }
+#endregion
+
 
 enum AppMode
 {
@@ -531,5 +610,6 @@ enum AppMode
     NewCustomer = 3,
     GetOpenTickets = 4,
     SolveTicket = 5,
+    GetStatusClient = 6,
 }
 
