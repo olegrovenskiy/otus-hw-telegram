@@ -51,6 +51,7 @@ const string helpTextSpecialist = @"
 
 int route = 1;
 var mode = AppMode.Default;
+Ticket foundTicket2 = null;
 
 
 
@@ -369,10 +370,12 @@ async Task SolveTicketsHandler(
                 {
                     //-------------------
                     {
-                        var foundTicket = tickets.FirstOrDefault(x => x.Number.ToString().Equals(text)
+                        var foundTicket1 = tickets.FirstOrDefault(x => x.Number.ToString().Equals(text)
                          && x.Specialist.Contains(update.Message.Chat.FirstName + update.Message.Chat.LastName) && x.TicketStatus == Ticket.Status.OnWork);
 
-                        if (foundTicket != null)
+                        foundTicket2 = foundTicket1;
+                        
+                        if (foundTicket1 != null)
                         {
                             await client.SendTextMessageAsync(update.Message.Chat.Id, "  Запишите решение или");
                             route = 2;
@@ -385,6 +388,10 @@ async Task SolveTicketsHandler(
                  break;
 
                 case 2:
+                foundTicket2.TicketStatus = Ticket.Status.Closed;
+                foundTicket2.Solution = text;
+
+
                 await client.SendTextMessageAsync(update.Message.Chat.Id, " Тикет успешно закрыт ");
                 break;
 

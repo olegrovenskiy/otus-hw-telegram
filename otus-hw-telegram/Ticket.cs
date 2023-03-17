@@ -12,7 +12,9 @@ public class Ticket
 
 	public Status TicketStatus { get; set; }
 
-	public string Comments { get; set; }
+	public string Solution { get; set; }
+
+
 	public Ticket(int _number, string _name, string _client, DateTime _created, string _specialist)
 		{
 		Number = _number;
@@ -21,7 +23,7 @@ public class Ticket
 		Created = _created;
 		Specialist = _specialist;
 		TicketStatus = Status.Open;
-		Comments = null;
+		Solution = null;
 		}
 
 	public void SendTicketDataToDB()
