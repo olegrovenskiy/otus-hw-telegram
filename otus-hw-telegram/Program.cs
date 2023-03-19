@@ -15,7 +15,7 @@ Console.WriteLine("Hello, World!");
 // перечень клиентов, в перспективе они будут в ЬД
 
 var customers = new List<Customer> {
-    new Customer("Oleg", "R", "Danon"),
+    new Customer("Oleg", "R", "specialist"),
         new Customer("Igor", "Fet", "specialist"),
         new Customer("Sergei", "Ivanov", "Danon"),
 };
@@ -25,13 +25,14 @@ DateTime h = new DateTime(2022, 1, 1, 01, 01, 00);
 
 
 var tickets = new List<Ticket> {
-    new Ticket (1, "alarm", "Danon", h, null),
-    new Ticket (2, "resolev", "DanonInt", h, "ivan sergeev"),
-
+    new Ticket (1, "alarm", "Danon", h),
+    new Ticket (2, "resolev", "DanonInt", h),
+    new Ticket (3, "resolev fair", "DanonInt", h)
     };
 
-tickets.First().Solution = "input power plag";
-tickets.First().TicketStatus = Ticket.Status.Closed;
+
+
+
 
 
 // перечень приветствий от Бота в зависимости от роли
@@ -67,7 +68,6 @@ var me = await client.GetMeAsync();
 
 client.StartReceiving(UpdateHandler, ErrorHandler);
 
-//Customer aa = new Customer();
 
 // по умолчанию
 async Task ErrorHandler(ITelegramBotClient arg1, Exception arg2, CancellationToken arg3)
@@ -159,8 +159,14 @@ async Task DefaultHandler(
             // нужен вывод назначеных тикетов
             await client.SendTextMessageAsync(update.Message.Chat.Id, "У вас в работе следующие тикеты");
 
+            string first = update.Message.Chat.FirstName;
+            string last = update.Message.Chat.LastName;
+            string firstlast = first + last;
+            Console.WriteLine(firstlast);
+
+
             var SignedTickets = from tt in tickets
-                                where tt.Specialist.Contains(update.Message.Chat.FirstName+update.Message.Chat.LastName)
+                                where tt.Specialist.Contains(firstlast)         //update.Message.Chat.FirstName+update.Message.Chat.LastName)
                                 where tt.TicketStatus == Ticket.Status.OnWork
                                 orderby tt.Number
                                 select tt;
@@ -205,7 +211,7 @@ async Task NewTicketHandler(
 
  // создание нового тикета, статус по умолчанию прописан как опен
 
-        tickets.Add(new Ticket (tickets.Last().Number+1, text, foundCustomer.Role, update.Message.Date, null));
+        tickets.Add(new Ticket (tickets.Last().Number+1, text, foundCustomer.Role, update.Message.Date));
 
 
         await client.SendTextMessageAsync(update.Message.Chat.Id,
@@ -463,7 +469,7 @@ async Task SolveTicketsHandler(
                             route = 2;
                         }
                         else
-                            await client.SendTextMessageAsync(update.Message.Chat.Id, "ВВедите тикет который у вас в работе или /exit");
+                            await client.SendTextMessageAsync(update.Message.Chat.Id, "Вdедите тикет который у вас в работе или /exit");
                     }
                     //------------------------------------
                 }
@@ -570,7 +576,7 @@ string GetGreeting (Chat chat)
         if (foundCustomer.Role == "admin")
         {
             return $@"
-    Привет, {chat.FirstName} {chat.LastName}!
+    Здравствуйте Администратор - {chat.FirstName} {chat.LastName}!
     Меня зовут {me.Username}, и я помогу Вам:
     {helpTextAdmin}
         ";
@@ -579,7 +585,7 @@ string GetGreeting (Chat chat)
         else if (foundCustomer.Role == "specialist")
         {
             return $@"
-     Привет, {chat.FirstName} {chat.LastName}!
+     Здравствуйте Специалист - {chat.FirstName} {chat.LastName}!
      Меня зовут {me.Username}, и я помогу Вам:
      {helpTextSpecialist}
         ";
@@ -589,8 +595,8 @@ string GetGreeting (Chat chat)
 
         {
             return $@"
-     Привет, {chat.FirstName} {chat.LastName}!
-     Меня зовут {me.Username}, и я помогу Вам:
+     Здравствуйте, {chat.FirstName} {chat.LastName}!
+     Меня зовут {me.Username}, и я рад помочь компании {foundCustomer.Role}:
      {helpTextClient}
     ";
         }

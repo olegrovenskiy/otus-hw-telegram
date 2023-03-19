@@ -15,13 +15,13 @@ public class Ticket
 	public string Solution { get; set; }
 
 
-	public Ticket(int _number, string _name, string _client, DateTime _created, string _specialist)
+	public Ticket(int _number, string _name, string _client, DateTime _created)
 		{
 		Number = _number;
 		Name = _name;
 		Client = _client;
 		Created = _created;
-		Specialist = _specialist;
+		Specialist = "empty";
 		TicketStatus = Status.Open;
 		Solution = null;
 		}
