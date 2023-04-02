@@ -12,12 +12,34 @@ using System.Linq;
 
 Console.WriteLine("Hello, World!");
 
-// перечень клиентов, в перспективе они будут в ЬД
+// ввод администратора
+
+Console.WriteLine("Введите данныё администратора системы");
+
+Console.WriteLine("Введите Имя");
+
+string AdminFirstName = Console.ReadLine();
+
+Console.WriteLine("Введите Фамилию");
+
+string AdminLastName = Console.ReadLine();
+
+
+// -------------------------------
+
+
+
+
+// перечень клиентов, в перспективе они будут в БД
+
+
+
 
 var customers = new List<Customer> {
+    new Customer(AdminFirstName, AdminLastName, "admin"),
     new Customer("Oleg", "R", "specialist"),
-        new Customer("Igor", "Fet", "specialist"),
-        new Customer("Sergei", "Ivanov", "Danon"),
+    new Customer("Igor", "Fet", "specialist"),
+    new Customer("Sergei", "Ivanov", "Danon"),
 };
 
 DateTime h = new DateTime(2022, 1, 1, 01, 01, 00);
@@ -30,8 +52,8 @@ var tickets = new List<Ticket> {
     new Ticket (3, "resolev fair", "DanonInt", h)
     };
 
-
-
+tickets.First().TicketStatus = Ticket.Status.OnWork;
+tickets.First().Specialist = "OlegR";
 
 
 
@@ -57,8 +79,6 @@ Ticket foundTicket2 = null;
 
 
 
-
-
 string token = "6130961419:AAHxjGCytBkTml-ssEvmXrwLlxIWEurPnDo";
 
 var client = new TelegramBotClient(token);
@@ -74,6 +94,10 @@ async Task ErrorHandler(ITelegramBotClient arg1, Exception arg2, CancellationTok
 {
   throw new NotImplementedException();
 }
+
+
+
+
 
 
 #region DefaultHandler
@@ -241,17 +265,11 @@ async Task TicketStatusHandler(
     else if (!string.IsNullOrEmpty(text))
     {
 
-
-        //    var foundCustomer = customers.FirstOrDefault(x => x.FirstName.Contains(chat.FirstName) && x.LastName.Contains(chat.LastName));
-
  
         var ticketFound = tickets.FirstOrDefault(x => x.Number.ToString().Contains(text));
 
         if (ticketFound != null)
         {
-
-
-            //   await client.SendTextMessageAsync(update.Message.Chat.Id, "Номер     Имя    Специалист  Статус  Время создания");
 
 
             if (ticketFound.Specialist != null)
@@ -300,8 +318,6 @@ async Task TicketClientStatusHandler(
 
         var ticketFound = tickets.FirstOrDefault(x => x.Number.ToString().Contains(text) && x.Client.Contains(foundCustomerCompany.Role)
          && x.TicketStatus == Ticket.Status.Closed);
-
-
 
 
 
@@ -365,6 +381,8 @@ async Task NewCustomerHandler(
 
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите данные ещё одного пользователя или /exit");
 
+
+
         }
 
         else
@@ -398,7 +416,6 @@ async Task GetOpenTicketsHandler(
     else if (!string.IsNullOrEmpty(text))
     {
         // обработка введёного номера тикета    
-        //var foundContact = contacts.FirstOrDefault(x => x.FirstName.ToLower() == text || x.LastName.ToLower() == text);
 
         var foundTicket = tickets.FirstOrDefault(x => x.Number.ToString().Equals(text));
 
@@ -530,8 +547,6 @@ async Task UpdateHandler(ITelegramBotClient client,
             break;
 
 
-
-
         case AppMode.OpenTicket:
             await NewTicketHandler(client, update, ct);
             break;
@@ -550,11 +565,7 @@ async Task UpdateHandler(ITelegramBotClient client,
             break;
 
 
-
-
     }
-
-
 
 }
 #endregion
