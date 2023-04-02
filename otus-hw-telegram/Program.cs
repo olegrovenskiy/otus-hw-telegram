@@ -37,7 +37,7 @@ string AdminLastName = Console.ReadLine();
 
 var customers = new List<Customer> {
     new Customer(AdminFirstName, AdminLastName, "admin"),
-    new Customer("Oleg", "R", "specialist"),
+    new Customer("Oleg", "Rov", "specialist"),
     new Customer("Igor", "Fet", "specialist"),
     new Customer("Sergei", "Ivanov", "Danon"),
 };
@@ -373,12 +373,21 @@ async Task NewCustomerHandler(
 
             Console.WriteLine($" 1 - {words[0]}  2-- {words[1]}   3 --- {words[2]}");
 
-            customers.Add(new Customer(words[0], words[1], words[2]));
+            // проверка что такое имя и фимилия существует 
+
+            var cust = from word in customers
+                       where word.LastName.Contains(words[1])
+                       where word.FirstName.Contains(words[0])
+                       select word.FirstName;
 
 
-            await client.SendTextMessageAsync(update.Message.Chat.Id,
-                $"Пользователь {words[0]}  {words[1]}  {words[2]}  успешно добавлен");
-
+            if (cust.Contains(words[0])) await client.SendTextMessageAsync(update.Message.Chat.Id, $"Пользователь {words[0]} уже существует");
+            else
+            {
+                customers.Add(new Customer(words[0], words[1], words[2]));
+                await client.SendTextMessageAsync(update.Message.Chat.Id,
+                    $"Пользователь {words[0]}  {words[1]}  {words[2]}  успешно добавлен");
+            }
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите данные ещё одного пользователя или /exit");
 
 
