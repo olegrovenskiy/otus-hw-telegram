@@ -26,7 +26,7 @@ using (UserContext db = new UserContext())
     //Customer testDB = new Customer("Oleg", "Rov", "specialist");
     //db.Customers.Add(testDB);
 
-    db.Customers.Add(new Customer ("Oleg", "Rov", "specialist" ));
+    //db.Customers.Add(new Customer ("Oleg", "Rov", "specialist" ));
 
 
     Console.WriteLine("Объекты успешно сохранены");
@@ -71,14 +71,43 @@ using (UserContext db = new UserContext())
 
     // перечень клиентов, в перспективе они будут в БД
 
+    db.Customers.Add(new Customer(AdminFirstName, AdminLastName, "admin"));
+    db.Customers.Add(new Customer("Oleg", "Gov", "specialist"));
+    db.Customers.Add(new Customer("Sergei", "Ivanov", "Danon"));
+    db.Customers.Add(new Customer("Igor", "Fet", "specialist"));
+    db.SaveChanges();
+   
+    var customers = db.Customers;
 
 
-    var customers = new List<Customer> {
-    new Customer(AdminFirstName, AdminLastName, "admin"),
-    new Customer("Oleg", "Rov", "specialist"),
-    new Customer("Igor", "Fet", "specialist"),
-    new Customer("Sergei", "Ivanov", "Danon"),
-};
+    Console.WriteLine("Список customers:");
+    foreach (Customer cc in db.Customers)
+    {
+        Console.WriteLine("{0}.{1} - {2}  -- {3}", cc.Id, cc.FirstName, cc.LastName, cc.Role);
+    }
+
+    /*
+    var cust = from word in db.Customers
+               where word.LastName.Contains("Gov")
+               where word.FirstName.Contains("Oleg")
+               select word.Role;
+
+    var ff = cust.FirstOrDefault();
+    Console.WriteLine("yyyy" + ff);
+    */
+
+
+
+    /*
+        var customers = new List<Customer> {
+        new Customer(AdminFirstName, AdminLastName, "admin"),
+        new Customer("Oleg", "Rov", "specialist"),
+        new Customer("Igor", "Fet", "specialist"),
+        new Customer("Sergei", "Ivanov", "Danon"),
+    };
+
+    */
+
 
     DateTime h = new DateTime(2022, 1, 1, 01, 01, 00);
 
@@ -413,16 +442,46 @@ using (UserContext db = new UserContext())
 
                 // проверка что такое имя и фимилия существует 
 
-                var cust = from word in customers
-                           where word.LastName.Contains(words[1])
-                           where word.FirstName.Contains(words[0])
+                Console.WriteLine("Point1");
+
+
+                //var customers1 = db.Customers;
+
+                string first = words[0]
+;               string second = words[1];
+                var cust = from word in db.Customers
+                           where word.LastName == second
+                           where word.FirstName == first
                            select word.FirstName;
+      
 
 
-                if (cust.Contains(words[0])) await client.SendTextMessageAsync(update.Message.Chat.Id, $"Пользователь {words[0]} уже существует");
+
+
+                Console.WriteLine("Point2");
+
+
+
+
+                //Console.WriteLine("{0}.{1} - {2}", u.Id, u.Name, u.Age);
+                
+                var ff = cust.FirstOrDefault();
+
+                Console.WriteLine(ff);
+
+
+                if (ff == words[0]) await client.SendTextMessageAsync(update.Message.Chat.Id, $"Пользователь {words[0]} уже существует");
+
+
                 else
                 {
-                    customers.Add(new Customer(words[0], words[1], words[2]));
+
+
+
+                    db.Customers.Add(new Customer(words[0], words[1], words[2]));
+
+                    //    customers.Add(new Customer(words[0], words[1], words[2]));
+                    db.SaveChanges();
                     await client.SendTextMessageAsync(update.Message.Chat.Id,
                         $"Пользователь {words[0]}  {words[1]}  {words[2]}  успешно добавлен");
                 }
