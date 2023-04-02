@@ -687,7 +687,7 @@ using (UserContext db = new UserContext())
         Console.WriteLine(chat.FirstName + "   " + chat.LastName);
 
 
-        var foundCustomer = customers.FirstOrDefault(x => x.FirstName.Contains(chat.FirstName) && x.LastName.Contains(chat.LastName));
+        var foundCustomer = db.Customers.FirstOrDefault(x => x.FirstName.Contains(chat.FirstName) && x.LastName.Contains(chat.LastName)); // customer
         if (foundCustomer != null)
         {
             if (foundCustomer.Role == "admin")
