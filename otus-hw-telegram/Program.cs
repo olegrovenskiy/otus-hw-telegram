@@ -72,7 +72,7 @@ using (UserContext db = new UserContext())
     // перечень клиентов, в перспективе они будут в БД
 
     db.Customers.Add(new Customer(AdminFirstName, AdminLastName, "admin"));
-    db.Customers.Add(new Customer("Oleg", "R", "Nestle"));
+    db.Customers.Add(new Customer("Oleg", "Dr", "Nestle"));
     db.Customers.Add(new Customer("Sergei", "Ivanov", "Danon"));
     db.Customers.Add(new Customer("Igor", "Fet", "specialist"));
     db.SaveChanges();
@@ -114,13 +114,21 @@ using (UserContext db = new UserContext())
 
 
     var tickets = new List<Ticket> {
-    new Ticket (1, "alarm", "Danon", h),
+    new Ticket (1, "alarm---", "Danon", h),
     new Ticket (2, "resolev", "DanonInt", h),
     new Ticket (3, "resolev fair", "DanonInt", h)
     };
 
     tickets.First().TicketStatus = Ticket.Status.OnWork;
     tickets.First().Specialist = "OlegR";
+
+
+    db.Tickets.Add(new TicketDB("alarm---DB", "Danon", h));
+    db.Tickets.Add(new TicketDB("alarm2---DB", "Danon", h));
+    db.SaveChanges();
+    TicketDB ticketFound = db.Tickets.Find(1);
+
+    Console.WriteLine("FOUND DB" + ticketFound.Id + ticketFound.Name);
 
 
 
@@ -192,7 +200,7 @@ using (UserContext db = new UserContext())
             case "/StatusTicket":
                 mode = AppMode.GetStatus;
 
-                await client.SendTextMessageAsync(update.Message.Chat.Id, $"В системе заведено {tickets.Count} тикетов");
+                await client.SendTextMessageAsync(update.Message.Chat.Id, $"В системе заведено {db.Tickets.Count()} тикетов");
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета информацию о котором вы хотите получить или /exit");
                 break;
 
@@ -331,9 +339,14 @@ using (UserContext db = new UserContext())
         }
         else if (!string.IsNullOrEmpty(text))
         {
+            int TicketId = int.Parse(text);
 
 
-            var ticketFound = tickets.FirstOrDefault(x => x.Id.ToString().Contains(text));
+
+          //  var ticketFound = db.Tickets.FirstOrDefault(x => x.Id.ToString().Contains(text));
+
+            TicketDB ticketFound = db.Tickets.Find(TicketId);
+
 
             if (ticketFound != null)
             {
