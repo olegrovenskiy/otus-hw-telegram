@@ -210,13 +210,13 @@ using (UserContext db = new UserContext())
 
                 var ClientTickets = from tt in tickets
                                     where tt.Client.Contains(foundCustomerCompany.Role)
-                                    orderby tt.Number
+                                    orderby tt.Id
                                     select tt;
 
                 await client.SendTextMessageAsync(update.Message.Chat.Id, $"Компанией {foundCustomerCompany.Role} системе были заведены следующие тикеты");
 
                 foreach (var t in ClientTickets)
-                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"Тикет {t.Number} с проблемой {t.Name} " +
+                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"Тикет {t.Id} с проблемой {t.Name} " +
                         $"зарегестрирован {t.Created} имеет статус {t.TicketStatus}");
 
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер решённоги тикета информацию о решении которого вы хотите получить или /exit");
@@ -236,7 +236,7 @@ using (UserContext db = new UserContext())
                 foreach (Ticket tt in tickets)
                 {
                     if (tt.TicketStatus == 0)
-                        await client.SendTextMessageAsync(update.Message.Chat.Id, $"   {tt.Number}       {tt.Name}    {tt.Client} ");
+                        await client.SendTextMessageAsync(update.Message.Chat.Id, $"   {tt.Id}       {tt.Name}    {tt.Client} ");
 
                 }
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета с которым планируете работать или /exit");
@@ -259,11 +259,11 @@ using (UserContext db = new UserContext())
                 var SignedTickets = from tt in tickets
                                     where tt.Specialist.Contains(firstlast)         //update.Message.Chat.FirstName+update.Message.Chat.LastName)
                                     where tt.TicketStatus == Ticket.Status.OnWork
-                                    orderby tt.Number
+                                    orderby tt.Id
                                     select tt;
 
                 foreach (var t in SignedTickets)
-                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"номер {t.Number}, проблема {t.Name}, заказчик {t.Client}");
+                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"номер {t.Id}, проблема {t.Name}, заказчик {t.Client}");
 
 
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер решённого тикета или /exit");
@@ -302,11 +302,11 @@ using (UserContext db = new UserContext())
 
             // создание нового тикета, статус по умолчанию прописан как опен
 
-            tickets.Add(new Ticket(tickets.Last().Number + 1, text, foundCustomer.Role, update.Message.Date));
+            tickets.Add(new Ticket(tickets.Last().Id + 1, text, foundCustomer.Role, update.Message.Date));
 
 
             await client.SendTextMessageAsync(update.Message.Chat.Id,
-                $"Тикет номер {tickets.Last().Number} успешно создан");             // '{text}'");
+                $"Тикет номер {tickets.Last().Id} успешно создан");             // '{text}'");
 
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Если остались проблемы, то создайте новый тикет или /exit");
 
@@ -333,7 +333,7 @@ using (UserContext db = new UserContext())
         {
 
 
-            var ticketFound = tickets.FirstOrDefault(x => x.Number.ToString().Contains(text));
+            var ticketFound = tickets.FirstOrDefault(x => x.Id.ToString().Contains(text));
 
             if (ticketFound != null)
             {
@@ -341,12 +341,12 @@ using (UserContext db = new UserContext())
 
                 if (ticketFound.Specialist != null)
                 {
-                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Number}  с проблемой {ticketFound.Name} " +
+                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Id}  с проблемой {ticketFound.Name} " +
                         $"назначен на {ticketFound.Specialist} " +
                         $"статус {ticketFound.TicketStatus} создан {ticketFound.Created}");
                 }
                 else
-                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Number}  с проблемой {ticketFound.Name} " +
+                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Id}  с проблемой {ticketFound.Name} " +
                                         $"не назначен на специалиста, cоздан {ticketFound.Created}");
 
 
@@ -383,7 +383,7 @@ using (UserContext db = new UserContext())
                                 && x.LastName.Contains(update.Message.Chat.LastName));
 
 
-            var ticketFound = tickets.FirstOrDefault(x => x.Number.ToString().Contains(text) && x.Client.Contains(foundCustomerCompany.Role)
+            var ticketFound = tickets.FirstOrDefault(x => x.Id.ToString().Contains(text) && x.Client.Contains(foundCustomerCompany.Role)
              && x.TicketStatus == Ticket.Status.Closed);
 
 
@@ -392,7 +392,7 @@ using (UserContext db = new UserContext())
             {
 
 
-                await client.SendTextMessageAsync(update.Message.Chat.Id, $"По тикету {ticketFound.Number} специалистом было предложено следующее решение:");
+                await client.SendTextMessageAsync(update.Message.Chat.Id, $"По тикету {ticketFound.Id} специалистом было предложено следующее решение:");
                 await client.SendTextMessageAsync(update.Message.Chat.Id, ticketFound.Solution);
 
 
@@ -523,7 +523,7 @@ using (UserContext db = new UserContext())
         {
             // обработка введёного номера тикета    
 
-            var foundTicket = tickets.FirstOrDefault(x => x.Number.ToString().Equals(text));
+            var foundTicket = tickets.FirstOrDefault(x => x.Id.ToString().Equals(text));
 
             if (foundTicket != null)
             {
@@ -581,7 +581,7 @@ using (UserContext db = new UserContext())
                     {
                         //-------------------
                         {
-                            var foundTicket1 = tickets.FirstOrDefault(x => x.Number.ToString().Equals(text)
+                            var foundTicket1 = tickets.FirstOrDefault(x => x.Id.ToString().Equals(text)
                              && x.Specialist.Contains(update.Message.Chat.FirstName + update.Message.Chat.LastName) && x.TicketStatus == Ticket.Status.OnWork);
 
                             foundTicket2 = foundTicket1;

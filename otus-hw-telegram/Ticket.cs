@@ -2,7 +2,7 @@
 
 public class Ticket
 {
-	public int Number { get; set; }
+	public int Id { get; set; }
 	public string Name { get; set; }
 
 	public string Client { get; set; }
@@ -17,7 +17,7 @@ public class Ticket
 
 	public Ticket(int _number, string _name, string _client, DateTime _created)
 		{
-		Number = _number;
+		Id = _number;
 		Name = _name;
 		Client = _client;
 		Created = _created;
@@ -26,6 +26,7 @@ public class Ticket
 		Solution = null;
 		}
 
+	/*
 	public void SendTicketDataToDB()
 	{
 
@@ -33,6 +34,7 @@ public class Ticket
 
 	}
 
+	*/
 
     public enum Status
     {
