@@ -72,7 +72,7 @@ using (UserContext db = new UserContext())
     // перечень клиентов, в перспективе они будут в БД
 
     db.Customers.Add(new Customer(AdminFirstName, AdminLastName, "admin"));
-    db.Customers.Add(new Customer("Oleg", "Dr", "Nestle"));
+    db.Customers.Add(new Customer("Oleg", "R", "Danon"));
     db.Customers.Add(new Customer("Sergei", "Ivanov", "Danon"));
     db.Customers.Add(new Customer("Igor", "Fet", "specialist"));
     db.SaveChanges();
@@ -126,7 +126,9 @@ using (UserContext db = new UserContext())
     db.Tickets.Add(new TicketDB("alarm---DB", "Danon", h));
     db.Tickets.Add(new TicketDB("alarm2---DB", "Danon", h));
     db.SaveChanges();
-    TicketDB ticketFound = db.Tickets.Find(1);
+    // TicketDB ticketFound = db.Tickets.LastOrDefault();
+    var ticketFound = db.Tickets.OrderByDescending(obj => obj.Id).FirstOrDefault();
+
 
     Console.WriteLine("FOUND DB" + ticketFound.Id + ticketFound.Name);
 
@@ -216,7 +218,7 @@ using (UserContext db = new UserContext())
 
                 // search cloent tickets
 
-                var ClientTickets = from tt in tickets
+                var ClientTickets = from tt in db.Tickets
                                     where tt.Client.Contains(foundCustomerCompany.Role)
                                     orderby tt.Id
                                     select tt;
@@ -310,11 +312,20 @@ using (UserContext db = new UserContext())
 
             // создание нового тикета, статус по умолчанию прописан как опен
 
-            tickets.Add(new Ticket(tickets.Last().Id + 1, text, foundCustomer.Role, update.Message.Date));
 
+            string cust = foundCustomer.Role;
+            DateTime h1 = update.Message.Date;
+            db.Tickets.Add(new TicketDB (text, cust, h1));
+            db.SaveChanges();
+
+            Console.WriteLine("Add ticket to DB");
+
+            var tt = db.Tickets.OrderByDescending(obj => obj.Id).FirstOrDefault();
+           // TicketDB tt = db.Tickets.LastOrDefault();
+            Console.WriteLine("FOUND DB LAST" + tt.Id + tt.Name);
 
             await client.SendTextMessageAsync(update.Message.Chat.Id,
-                $"Тикет номер {tickets.Last().Id} успешно создан");             // '{text}'");
+                $"Тикет номер {tt.Id} успешно создан");             // '{text}'");
 
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Если остались проблемы, то создайте новый тикет или /exit");
 
