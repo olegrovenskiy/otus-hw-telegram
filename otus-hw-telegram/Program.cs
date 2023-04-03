@@ -10,10 +10,10 @@ using static System.Net.Mime.MediaTypeNames;
 using System.Linq;
 using System.Runtime.Intrinsics.X86;
 
-//---------------------------------------
 using (UserContext db = new UserContext())
 {
 
+//---------------------------------------
     // создаем два объекта User
     User user1 = new User { Name = "Tom", Age = 33 };
     User user2 = new User { Name = "Sam", Age = 26 };
@@ -72,7 +72,7 @@ using (UserContext db = new UserContext())
     // перечень клиентов, в перспективе они будут в БД
 
     db.Customers.Add(new Customer(AdminFirstName, AdminLastName, "admin"));
-    db.Customers.Add(new Customer("Oleg", "Gov", "specialist"));
+    db.Customers.Add(new Customer("Oleg", "R", "Nestle"));
     db.Customers.Add(new Customer("Sergei", "Ivanov", "Danon"));
     db.Customers.Add(new Customer("Igor", "Fet", "specialist"));
     db.SaveChanges();
@@ -202,7 +202,7 @@ using (UserContext db = new UserContext())
 
                 //search client company name
 
-                var foundCustomerCompany = customers.FirstOrDefault(x => x.FirstName.Contains(update.Message.Chat.FirstName)
+                var foundCustomerCompany = db.Customers.FirstOrDefault(x => x.FirstName.Contains(update.Message.Chat.FirstName)
                         && x.LastName.Contains(update.Message.Chat.LastName));
 
 
@@ -297,7 +297,7 @@ using (UserContext db = new UserContext())
         }
         else if (!string.IsNullOrEmpty(text))
         {
-            var foundCustomer = customers.FirstOrDefault(x => x.FirstName.Contains(update.Message.Chat.FirstName)
+            var foundCustomer = db.Customers.FirstOrDefault(x => x.FirstName.Contains(update.Message.Chat.FirstName)
             && x.LastName.Contains(update.Message.Chat.LastName));
 
             // создание нового тикета, статус по умолчанию прописан как опен
@@ -379,7 +379,7 @@ using (UserContext db = new UserContext())
         else if (!string.IsNullOrEmpty(text))
         {
 
-            var foundCustomerCompany = customers.FirstOrDefault(x => x.FirstName.Contains(update.Message.Chat.FirstName)
+            var foundCustomerCompany = db.Customers.FirstOrDefault(x => x.FirstName.Contains(update.Message.Chat.FirstName)
                                 && x.LastName.Contains(update.Message.Chat.LastName));
 
 
