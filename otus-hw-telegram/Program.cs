@@ -69,7 +69,7 @@ using (UserContext db = new UserContext())
 
 
 
-    // перечень клиентов, в перспективе они будут в БД
+    // перечень клиентов,для тестов
    // db.Customers.Find(2).Role = "Danon";
 
     db.Customers.Add(new Customer(AdminFirstName, AdminLastName, "admin"));
@@ -88,29 +88,7 @@ using (UserContext db = new UserContext())
         Console.WriteLine("{0}.{1} - {2}  -- {3}", cc.Id, cc.FirstName, cc.LastName, cc.Role);
     }
 
-    /*
-    var cust = from word in db.Customers
-               where word.LastName.Contains("Gov")
-               where word.FirstName.Contains("Oleg")
-               select word.Role;
-
-    var ff = cust.FirstOrDefault();
-    Console.WriteLine("yyyy" + ff);
-    */
-
-
-
-    /*
-        var customers = new List<Customer> {
-        new Customer(AdminFirstName, AdminLastName, "admin"),
-        new Customer("Oleg", "Rov", "specialist"),
-        new Customer("Igor", "Fet", "specialist"),
-        new Customer("Sergei", "Ivanov", "Danon"),
-    };
-
-    */
-
-
+    
     DateTime h = new DateTime(2022, 1, 1, 01, 01, 00);
 
 
@@ -128,7 +106,7 @@ using (UserContext db = new UserContext())
     db.Tickets.Add(new TicketDB("alarm1---DB", "Danon", h));
     db.Tickets.Add(new TicketDB("alarm2---DB", "Danon", h));
     db.SaveChanges();
-    // TicketDB ticketFound = db.Tickets.LastOrDefault();
+
     var ticketFound = db.Tickets.OrderByDescending(obj => obj.Id).FirstOrDefault();
 
 
@@ -138,7 +116,6 @@ using (UserContext db = new UserContext())
 
     var tttt = db.Tickets.First();
     Console.WriteLine(tttt.Name+tttt.Specialist+tttt.TicketStatus);
-    // tttt.Specialist = "URA";
 
 
     db.Tickets.First().Specialist = "URA";
@@ -231,7 +208,7 @@ using (UserContext db = new UserContext())
                         && x.LastName.Contains(update.Message.Chat.LastName));
 
 
-                // search cloent tickets
+                // search clшent tickets
 
                 var ClientTickets = from tt in db.Tickets
                                     where tt.Client.Contains(foundCustomerCompany.Role)
@@ -259,15 +236,13 @@ using (UserContext db = new UserContext())
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Есть следующие открытые тикеты:");
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Номер     Имя    Заказчик");
                
-                
-                Console.WriteLine("Point1");
+             
                 foreach (TicketDB tt in db.Tickets)
                 {
                     if (tt.TicketStatus == 0)
                         await client.SendTextMessageAsync(update.Message.Chat.Id, $"   {tt.Id}       {tt.Name}    {tt.Client} ");
 
                 }
-                Console.WriteLine("Point1");
 
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета с которым планируете работать или /exit");
 
@@ -277,7 +252,7 @@ using (UserContext db = new UserContext())
             case "/SolveTicket":
                 mode = AppMode.SolveTicket;
 
-                // нужен вывод назначеных тикетов
+                // вывод назначеных тикетов
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "У вас в работе следующие тикеты");
 
                 string first = update.Message.Chat.FirstName;
@@ -285,9 +260,8 @@ using (UserContext db = new UserContext())
                 string firstlast = first + last;
                 Console.WriteLine(firstlast);
 
-
                 var SignedTickets = from tt in db.Tickets
-                                    where tt.Specialist.Contains(firstlast)         //update.Message.Chat.FirstName+update.Message.Chat.LastName)
+                                    where tt.Specialist.Contains(firstlast)         
                                     where tt.TicketStatus == TicketDB.Status.OnWork
                                     orderby tt.Id
                                     select tt;
@@ -295,11 +269,8 @@ using (UserContext db = new UserContext())
                 foreach (var t in SignedTickets)
                     await client.SendTextMessageAsync(update.Message.Chat.Id, $"номер {t.Id}, проблема {t.Name}, заказчик {t.Client}");
 
-
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер решённого тикета или /exit");
                 break;
-
-
 
 
             default:
@@ -341,11 +312,11 @@ using (UserContext db = new UserContext())
             Console.WriteLine("Add ticket to DB");
 
             var tt = db.Tickets.OrderByDescending(obj => obj.Id).FirstOrDefault();
-           // TicketDB tt = db.Tickets.LastOrDefault();
+
             Console.WriteLine("FOUND DB LAST" + tt.Id + tt.Name);
 
             await client.SendTextMessageAsync(update.Message.Chat.Id,
-                $"Тикет номер {tt.Id} успешно создан");             // '{text}'");
+                $"Тикет номер {tt.Id} успешно создан");         
 
             await client.SendTextMessageAsync(update.Message.Chat.Id, "Если остались проблемы, то создайте новый тикет или /exit");
 
@@ -372,9 +343,6 @@ using (UserContext db = new UserContext())
         {
             int TicketId = int.Parse(text);
 
-
-
-          //  var ticketFound = db.Tickets.FirstOrDefault(x => x.Id.ToString().Contains(text));
 
             TicketDB ticketFound = db.Tickets.Find(TicketId);
 
@@ -486,10 +454,7 @@ using (UserContext db = new UserContext())
 
                 // проверка что такое имя и фимилия существует 
 
-                Console.WriteLine("Point1");
 
-
-                //var customers1 = db.Customers;
 
                 string first = words[0]
 ;               string second = words[1];
@@ -499,16 +464,7 @@ using (UserContext db = new UserContext())
                            select word.FirstName;
       
 
-
-
-
-                Console.WriteLine("Point2");
-
-
-
-
-                //Console.WriteLine("{0}.{1} - {2}", u.Id, u.Name, u.Age);
-                
+               
                 var ff = cust.FirstOrDefault();
 
                 Console.WriteLine(ff);
@@ -524,7 +480,6 @@ using (UserContext db = new UserContext())
 
                     db.Customers.Add(new Customer(words[0], words[1], words[2]));
 
-                    //    customers.Add(new Customer(words[0], words[1], words[2]));
                     db.SaveChanges();
                     await client.SendTextMessageAsync(update.Message.Chat.Id,
                         $"Пользователь {words[0]}  {words[1]}  {words[2]}  успешно добавлен");
@@ -573,13 +528,8 @@ using (UserContext db = new UserContext())
             int TicketId = int.Parse(text);
 
 
-            //  var ticketFound = db.Tickets.FirstOrDefault(x => x.Id.ToString().Contains(text));
-
             TicketDB foundTicket = db.Tickets.Find(TicketId);
 
-
-
-           // var foundTicket = tickets.FirstOrDefault(x => x.Id.ToString().Equals(text));
 
             if (foundTicket != null)
             {
@@ -588,10 +538,7 @@ using (UserContext db = new UserContext())
 
                 db.Tickets.Find(TicketId).TicketStatus = TicketDB.Status.OnWork;
 
-                //foundTicket.TicketStatus = TicketDB.Status.OnWork;
-
                 db.Tickets.Find(TicketId).Specialist = $"{update.Message.Chat.FirstName}{update.Message.Chat.LastName}";
-                //foundTicket.Specialist = $"{update.Message.Chat.FirstName}{update.Message.Chat.LastName}";
 
                 db.SaveChanges();
 
@@ -650,8 +597,7 @@ using (UserContext db = new UserContext())
                         //-------------------
                         {
                             
-                            
-                            
+                                                      
                             
                             var foundTicket1 = db.Tickets.FirstOrDefault(x => x.Id.ToString().Equals(text)
                              && x.Specialist.Contains(update.Message.Chat.FirstName + update.Message.Chat.LastName) && x.TicketStatus == TicketDB.Status.OnWork);
