@@ -18,18 +18,45 @@ using (UserContext db = new UserContext())
 
     Console.WriteLine("Hello, World!");
 
+
+   // var foundSystemAdmin = db.Customers.FirstOrDefault(x => x.Role == "admin");
+
+    var foundSystemAdmin = from adm in db.Customers
+                        where adm.Role.Contains("admin")
+                        orderby adm.Id
+                        select adm;
+
+
+    Console.WriteLine("В системе зарегестрированы следующие Администраторы:");
+
+    foreach (var adm1 in foundSystemAdmin)
+        Console.WriteLine(adm1.FirstName + "   " + adm1.LastName);
+
+
     // ввод администратора
 
-    Console.WriteLine("Введите данныё администратора системы");
+    Console.WriteLine("будете вводить нового Администратора?  yes?");
+    string Yes = Console.ReadLine();
 
-    Console.WriteLine("Введите Имя");
+    if (Yes == "yes")
+    {
 
-    string AdminFirstName = Console.ReadLine();
+        Console.WriteLine("Введите данныё администратора системы");
 
-    Console.WriteLine("Введите Фамилию");
+        Console.WriteLine("Введите Имя");
 
-    string AdminLastName = Console.ReadLine();
+        string AdminFirstName = Console.ReadLine();
 
+        Console.WriteLine("Введите Фамилию");
+
+        string AdminLastName = Console.ReadLine();
+
+
+
+     db.Customers.Add(new Customer(AdminFirstName, AdminLastName, "admin"));
+
+
+    }
 
     // -------------------------------
 
@@ -39,12 +66,11 @@ using (UserContext db = new UserContext())
     // перечень клиентов,для тестов
    // db.Customers.Find(2).Role = "Danon";
 
-    db.Customers.Add(new Customer(AdminFirstName, AdminLastName, "admin"));
-    db.Customers.Add(new Customer("Oleg", "Ran", "specialist"));
-    db.Customers.Add(new Customer("Sergei", "Ivanov", "Danon"));
-    db.Customers.Add(new Customer("Igor", "Fet", "specialist"));
+    //db.Customers.Add(new Customer("Oleg", "R", "specialist"));
+   // db.Customers.Add(new Customer("Sergei", "Ivanov", "Danon"));
+   // db.Customers.Add(new Customer("Igor", "Fet", "specialist"));
     db.SaveChanges();
-
+    
 
  //   var customers = db.Customers;
 
@@ -71,8 +97,8 @@ using (UserContext db = new UserContext())
     */
 
 
-    db.Tickets.Add(new TicketDB("alarm1---DB", "Danon", h));
-    db.Tickets.Add(new TicketDB("alarm2---DB", "Danon", h));
+   // db.Tickets.Add(new TicketDB("alarm1---DB", "Danon", h));
+   // db.Tickets.Add(new TicketDB("alarm2---DB", "Danon", h));
     db.SaveChanges();
 
 
@@ -179,6 +205,18 @@ using (UserContext db = new UserContext())
                 mode = AppMode.GetStatus;
 
                 await client.SendTextMessageAsync(update.Message.Chat.Id, $"В системе заведено {db.Tickets.Count()} тикетов");
+
+
+
+                await client.SendTextMessageAsync(update.Message.Chat.Id, "ID тикетов, которые не назначены на специалистов");
+                foreach (var ttt in db.Tickets)
+                {
+                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"ID  {ttt.Id} ");
+
+                }
+
+
+
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер тикета информацию о котором вы хотите получить или /exit");
                 break;
 
@@ -497,8 +535,8 @@ using (UserContext db = new UserContext())
     {
         var text = update.Message?.Text?.Trim();
 
-        var tr1 = db.Tickets.Find(1);
-        Console.WriteLine("gggg" + tr1.Id + tr1.Name + tr1.Specialist + tr1.TicketStatus);
+    //    var tr1 = db.Tickets.Find(1);
+    //    Console.WriteLine("gggg" + tr1.Id + tr1.Name + tr1.Specialist + tr1.TicketStatus);
 
         if (text == "/exit")
         {
@@ -526,8 +564,8 @@ using (UserContext db = new UserContext())
 
                 db.SaveChanges();
 
-                var tr = db.Tickets.Find(1);
-                Console.WriteLine("uuu" + tr.Id + tr.Name + tr.Specialist + tr.TicketStatus);
+                //var tr = db.Tickets.Find(1);
+                //Console.WriteLine("uuu" + tr.Id + tr.Name + tr.Specialist + tr.TicketStatus);
 
 
                 await client.SendTextMessageAsync(update.Message.Chat.Id, $"Тикет номер {text} назначен вам в работу");
@@ -558,8 +596,8 @@ using (UserContext db = new UserContext())
     {
         var text = update.Message?.Text?.Trim();
 
-        var tr = db.Tickets.Find(1);
-        Console.WriteLine("xxxxx" + tr.Id + tr.Name + tr.Specialist + tr.TicketStatus);
+       // var tr = db.Tickets.Find(1);
+       // Console.WriteLine("xxxxx" + tr.Id + tr.Name + tr.Specialist + tr.TicketStatus);
 
         if (text == "/exit")
         {
@@ -614,8 +652,8 @@ using (UserContext db = new UserContext())
             }
 
         db.SaveChanges();
-        var tr2 = db.Tickets.Find(1);
-        Console.WriteLine("sssss" + tr2.Id + tr2.Name + tr2.Specialist + tr2.TicketStatus + tr2.Solution);
+       // var tr2 = db.Tickets.Find(1);
+       // Console.WriteLine("sssss" + tr2.Id + tr2.Name + tr2.Specialist + tr2.TicketStatus + tr2.Solution);
 
     }
     #endregion
