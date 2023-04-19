@@ -23,7 +23,7 @@ public class TicketDB
         Created = _created;
         Specialist = "empty";
         TicketStatus = Status.Open;
-        Solution = null;
+        Solution = "empty";
     }
 
     public TicketDB() { }

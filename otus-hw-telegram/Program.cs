@@ -13,41 +13,8 @@ using System.Runtime.Intrinsics.X86;
 using (UserContext db = new UserContext())
 {
 
-//---------------------------------------
-    // создаем два объекта User
-    User user1 = new User { Name = "Tom", Age = 33 };
-    User user2 = new User { Name = "Sam", Age = 26 };
 
-    // добавляем их в бд
-    db.Users.Add(user1);
-    db.Users.Add(user2);
-    db.SaveChanges();
-
-    //Customer testDB = new Customer("Oleg", "Rov", "specialist");
-    //db.Customers.Add(testDB);
-
-    //db.Customers.Add(new Customer ("Oleg", "Rov", "specialist" ));
-
-
-    Console.WriteLine("Объекты успешно сохранены");
-
-    // получаем объекты из бд и выводим на консоль
-    var users = db.Users;
-    Console.WriteLine("Список объектов:");
-    foreach (User u in users)
-    {
-        Console.WriteLine("{0}.{1} - {2}", u.Id, u.Name, u.Age);
-    }
-
-
-
-
-
-
-
-
-    //--------------------------------
-
+    //---------------------------------------
 
     Console.WriteLine("Hello, World!");
 
@@ -79,7 +46,7 @@ using (UserContext db = new UserContext())
     db.SaveChanges();
 
 
-    var customers = db.Customers;
+ //   var customers = db.Customers;
 
 
     Console.WriteLine("Список customers:");
@@ -88,11 +55,11 @@ using (UserContext db = new UserContext())
         Console.WriteLine("{0}.{1} - {2}  -- {3}", cc.Id, cc.FirstName, cc.LastName, cc.Role);
     }
 
-    
-    DateTime h = new DateTime(2022, 1, 1, 01, 01, 00);
+
+    DateTime h = new DateTime(2022, 1, 1, 01, 01, 00, DateTimeKind.Utc);
 
 
-
+    /*
     var tickets = new List<Ticket> {
     new Ticket (1, "alarm---", "Danon", h),
     new Ticket (2, "resolev", "DanonInt", h),
@@ -101,12 +68,17 @@ using (UserContext db = new UserContext())
 
     tickets.First().TicketStatus = Ticket.Status.OnWork;
     tickets.First().Specialist = "OlegR";
+    */
 
 
     db.Tickets.Add(new TicketDB("alarm1---DB", "Danon", h));
     db.Tickets.Add(new TicketDB("alarm2---DB", "Danon", h));
     db.SaveChanges();
 
+
+
+    /*
+    //--------------------
     var ticketFound = db.Tickets.OrderByDescending(obj => obj.Id).FirstOrDefault();
 
 
@@ -121,7 +93,19 @@ using (UserContext db = new UserContext())
     db.Tickets.First().Specialist = "URA";
     db.SaveChanges();
     var ttt = db.Tickets.First();
-    Console.WriteLine(ttt.Name+ttt.Specialist+ttt.TicketStatus);
+    Console.WriteLine(ttt.Name+ttt.Specialist+ttt.TicketStatus + ttt.Solution);
+
+
+    var f1 = db.Tickets.First();
+    var f2 = f1;
+    f2.TicketStatus = TicketDB.Status.Closed;
+    f2.Solution = "test test";
+    db.SaveChanges();
+    var t1 = db.Tickets.First();
+    Console.WriteLine("22222222   " + t1.Name + t1.Specialist + t1.TicketStatus + t1.Solution);
+    //---------------------
+    */
+
 
 
 
