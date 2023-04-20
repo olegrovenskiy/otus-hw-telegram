@@ -19,8 +19,6 @@ using (UserContext db = new UserContext())
     Console.WriteLine("Hello, World!");
 
 
-   // var foundSystemAdmin = db.Customers.FirstOrDefault(x => x.Role == "admin");
-
     var foundSystemAdmin = from adm in db.Customers
                         where adm.Role.Contains("admin")
                         orderby adm.Id
@@ -85,54 +83,11 @@ using (UserContext db = new UserContext())
     DateTime h = new DateTime(2022, 1, 1, 01, 01, 00, DateTimeKind.Utc);
 
 
-    /*
-    var tickets = new List<Ticket> {
-    new Ticket (1, "alarm---", "Danon", h),
-    new Ticket (2, "resolev", "DanonInt", h),
-    new Ticket (3, "resolev fair", "DanonInt", h)
-    };
-
-    tickets.First().TicketStatus = Ticket.Status.OnWork;
-    tickets.First().Specialist = "OlegR";
-    */
 
 
    // db.Tickets.Add(new TicketDB("alarm1---DB", "Danon", h));
    // db.Tickets.Add(new TicketDB("alarm2---DB", "Danon", h));
     db.SaveChanges();
-
-
-
-    /*
-    //--------------------
-    var ticketFound = db.Tickets.OrderByDescending(obj => obj.Id).FirstOrDefault();
-
-
-    Console.WriteLine("FOUND DB" + ticketFound.Id + ticketFound.Name);
-
-
-
-    var tttt = db.Tickets.First();
-    Console.WriteLine(tttt.Name+tttt.Specialist+tttt.TicketStatus);
-
-
-    db.Tickets.First().Specialist = "URA";
-    db.SaveChanges();
-    var ttt = db.Tickets.First();
-    Console.WriteLine(ttt.Name+ttt.Specialist+ttt.TicketStatus + ttt.Solution);
-
-
-    var f1 = db.Tickets.First();
-    var f2 = f1;
-    f2.TicketStatus = TicketDB.Status.Closed;
-    f2.Solution = "test test";
-    db.SaveChanges();
-    var t1 = db.Tickets.First();
-    Console.WriteLine("22222222   " + t1.Name + t1.Specialist + t1.TicketStatus + t1.Solution);
-    //---------------------
-    */
-
-
 
 
 
@@ -211,6 +166,8 @@ using (UserContext db = new UserContext())
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "ID тикетов, которые не назначены на специалистов");
                 foreach (var ttt in db.Tickets)
                 {
+                   
+                    // надо сделать выбор по неназначенным!!!
                     await client.SendTextMessageAsync(update.Message.Chat.Id, $"ID  {ttt.Id} ");
 
                 }
@@ -535,8 +492,6 @@ using (UserContext db = new UserContext())
     {
         var text = update.Message?.Text?.Trim();
 
-    //    var tr1 = db.Tickets.Find(1);
-    //    Console.WriteLine("gggg" + tr1.Id + tr1.Name + tr1.Specialist + tr1.TicketStatus);
 
         if (text == "/exit")
         {
@@ -564,8 +519,6 @@ using (UserContext db = new UserContext())
 
                 db.SaveChanges();
 
-                //var tr = db.Tickets.Find(1);
-                //Console.WriteLine("uuu" + tr.Id + tr.Name + tr.Specialist + tr.TicketStatus);
 
 
                 await client.SendTextMessageAsync(update.Message.Chat.Id, $"Тикет номер {text} назначен вам в работу");
@@ -596,8 +549,6 @@ using (UserContext db = new UserContext())
     {
         var text = update.Message?.Text?.Trim();
 
-       // var tr = db.Tickets.Find(1);
-       // Console.WriteLine("xxxxx" + tr.Id + tr.Name + tr.Specialist + tr.TicketStatus);
 
         if (text == "/exit")
         {
@@ -652,8 +603,7 @@ using (UserContext db = new UserContext())
             }
 
         db.SaveChanges();
-       // var tr2 = db.Tickets.Find(1);
-       // Console.WriteLine("sssss" + tr2.Id + tr2.Name + tr2.Specialist + tr2.TicketStatus + tr2.Solution);
+
 
     }
     #endregion
