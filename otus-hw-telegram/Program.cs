@@ -167,7 +167,8 @@ using (UserContext db = new UserContext())
                 foreach (var ttt in db.Tickets)
                 {
                    
-                    // надо сделать выбор по неназначенным!!!
+                    
+                    if (ttt.Specialist == "empty")   // проверка по неназначенным!!!
                     await client.SendTextMessageAsync(update.Message.Chat.Id, $"ID  {ttt.Id} ");
 
                 }
@@ -346,7 +347,7 @@ using (UserContext db = new UserContext())
             {
 
 
-                if (ticketFound.Specialist != null)
+                if (ticketFound.Specialist != "empty")
                 {
                     await client.SendTextMessageAsync(update.Message.Chat.Id, $"тикет {ticketFound.Id}  с проблемой {ticketFound.Name} " +
                         $"назначен на {ticketFound.Specialist} " +
