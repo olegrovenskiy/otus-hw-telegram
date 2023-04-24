@@ -187,22 +187,38 @@ using (UserContext db = new UserContext())
                         && x.LastName.Contains(update.Message.Chat.LastName));
 
 
-                // search clшent tickets
+                // search client tickets
 
                 var ClientTickets = from tt in db.Tickets
                                     where tt.Client.Contains(foundCustomerCompany.Role)
                                     orderby tt.Id
                                     select tt;
 
-                await client.SendTextMessageAsync(update.Message.Chat.Id, $"Компанией {foundCustomerCompany.Role} системе были заведены следующие тикеты");
 
-                foreach (var t in ClientTickets)
-                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"Тикет {t.Id} с проблемой {t.Name} " +
-                        $"зарегестрирован {t.Created} имеет статус {t.TicketStatus}");
 
-                await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер решённоги тикета информацию о решении которого вы хотите получить или /exit");
-                break;
 
+                if (ClientTickets.Count() != 0)
+
+                {
+                    // вставить проверку на наличие тикетов если нет, то другое сообщение
+
+                    await client.SendTextMessageAsync(update.Message.Chat.Id, $"Компанией {foundCustomerCompany.Role} системе были заведены следующие тикеты");
+
+                    // надо поправить, если нет тикетов и запрошен просмотр то 
+
+                    foreach (var t in ClientTickets)
+                        await client.SendTextMessageAsync(update.Message.Chat.Id, $"Тикет {t.Id} с проблемой {t.Name} " +
+                            $"зарегестрирован {t.Created} имеет статус {t.TicketStatus}");
+
+                    await client.SendTextMessageAsync(update.Message.Chat.Id, "Введите номер решённоги тикета информацию о решении которого вы хотите получить или /exit");
+                    break;
+                }
+
+                else
+                {
+                    await client.SendTextMessageAsync(update.Message.Chat.Id,  $"Компанией {foundCustomerCompany.Role} не заведены тикеты в систему /exit");
+                    break;
+                }
 
 
             case "/NewCustomer":
@@ -721,7 +737,7 @@ using (UserContext db = new UserContext())
 
             return $@"
     Привет, {chat.FirstName} {chat.LastName}!
-    Меня зовут {me.Username}, к сожалению я не нашёл Вас, обратитесь к Администратору по support@support.ru";
+    Меня зовут {me.Username}, к сожалению я не нашёл Вас, обратитесь к Администратору по support@support.ru ";
 
 
         }
